@@ -1,4 +1,4 @@
-use anyhow::{Context, Error, Result, bail};
+use anyhow::{bail, Context, Error, Result};
 use serde::Deserialize;
 use std::{fs, io::ErrorKind};
 
@@ -123,5 +123,5 @@ impl InfoFile {
     }
 }
 
-const NO_EXERCISES_ERR: &str = "There are no exercises yet!
-Add at least one exercise before testing.";
+const NO_EXERCISES_ERR: &str = "未发现任何谜题！
+在测试运行之前，请至少添加一个谜题。";

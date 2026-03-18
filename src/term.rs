@@ -1,8 +1,8 @@
 use crossterm::{
-    Command, QueueableCommand,
     cursor::MoveTo,
     style::{Attribute, Color, ResetColor, SetAttribute, SetForegroundColor},
     terminal::{Clear, ClearType},
+    Command, QueueableCommand,
 };
 use std::{
     fmt, fs,
@@ -99,20 +99,20 @@ impl<'a, 'lock> CheckProgressVisualizer<'a, 'lock> {
 
     pub fn build(stdout: &'a mut StdoutLock<'lock>, term_width: u16) -> io::Result<Self> {
         clear_terminal(stdout)?;
-        stdout.write_all("Checking all exercises…\n".as_bytes())?;
+        stdout.write_all("检查所有谜题中…\n".as_bytes())?;
 
         // Legend
-        stdout.write_all(b"Color of exercise number: ")?;
+        stdout.write_all("颜色指示: ".as_bytes())?;
         stdout.queue(SetForegroundColor(Self::CHECKING_COLOR))?;
-        stdout.write_all(b"Checking")?;
+        stdout.write_all("正在检查".as_bytes())?;
         stdout.queue(ResetColor)?;
         stdout.write_all(b" - ")?;
         stdout.queue(SetForegroundColor(Self::DONE_COLOR))?;
-        stdout.write_all(b"Done")?;
+        stdout.write_all("通过".as_bytes())?;
         stdout.queue(ResetColor)?;
         stdout.write_all(b" - ")?;
         stdout.queue(SetForegroundColor(Self::PENDING_COLOR))?;
-        stdout.write_all(b"Pending")?;
+        stdout.write_all("未通过".as_bytes())?;
         stdout.queue(ResetColor)?;
         stdout.write_all(b"\n")?;
 
@@ -168,7 +168,7 @@ pub struct ProgressCounter<'a, 'lock> {
 
 impl<'a, 'lock> ProgressCounter<'a, 'lock> {
     pub fn new(stdout: &'a mut StdoutLock<'lock>, total: usize) -> io::Result<Self> {
-        write!(stdout, "Progress: 0/{total}")?;
+        write!(stdout, "当前进度: 0/{total}")?;
         stdout.flush()?;
 
         Ok(Self {
@@ -180,7 +180,7 @@ impl<'a, 'lock> ProgressCounter<'a, 'lock> {
 
     pub fn increment(&mut self) -> io::Result<()> {
         self.counter += 1;
-        write!(self.stdout, "\rProgress: {}/{}", self.counter, self.total)?;
+        write!(self.stdout, "\r当前进度: {}/{}", self.counter, self.total)?;
         self.stdout.flush()
     }
 }
@@ -197,7 +197,7 @@ pub fn progress_bar<'a>(
     total: u32,
     term_width: u16,
 ) -> io::Result<()> {
-    const PREFIX: &[u8] = b"Progress: [";
+    const PREFIX: &[u8] = "当前进度: [".as_bytes();
     const PREFIX_WIDTH: u16 = PREFIX.len() as u16;
     const POSTFIX_WIDTH: u16 = "] xxx/xxx".len() as u16;
     const WRAPPER_WIDTH: u16 = PREFIX_WIDTH + POSTFIX_WIDTH;

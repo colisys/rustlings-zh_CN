@@ -1,25 +1,24 @@
 use anyhow::{Context, Result};
 use crossterm::{
-    QueueableCommand,
     style::{
         Attribute, Attributes, Color, ResetColor, SetAttribute, SetAttributes, SetForegroundColor,
     },
-    terminal,
+    terminal, QueueableCommand,
 };
 use std::{
     io::{self, Read, StdoutLock, Write},
-    sync::mpsc::{Sender, SyncSender, sync_channel},
+    sync::mpsc::{sync_channel, Sender, SyncSender},
     thread,
 };
 
 use crate::{
     app_state::{AppState, ExercisesProgress},
     clear_terminal,
-    exercise::{OUTPUT_CAPACITY, RunnableExercise, solution_link_line},
+    exercise::{solution_link_line, RunnableExercise, OUTPUT_CAPACITY},
     term::progress_bar,
 };
 
-use super::{InputPauseGuard, WatchEvent, terminal_event::terminal_event_handler};
+use super::{terminal_event::terminal_event_handler, InputPauseGuard, WatchEvent};
 
 const HEADING_ATTRIBUTES: Attributes = Attributes::none()
     .with(Attribute::Bold)
@@ -113,9 +112,9 @@ impl<'a> WatchState<'a> {
     pub fn reset_exercise(&mut self, stdout: &mut StdoutLock) -> Result<()> {
         clear_terminal(stdout)?;
 
-        stdout.write_all(b"Resetting will undo all your changes to the file ")?;
+        stdout.write_all("重置功能会丢弃所有未保存的修改，当前的谜题文件为：".as_bytes())?;
         stdout.write_all(self.app_state.current_exercise().path.as_bytes())?;
-        stdout.write_all(b"\nReset (y/n)? ")?;
+        stdout.write_all("\n是否继续(y/n)? ".as_bytes())?;
         stdout.flush()?;
 
         {
@@ -190,17 +189,17 @@ impl<'a> WatchState<'a> {
         };
 
         if self.manual_run {
-            show_key(b'r', b":run / ")?;
+            show_key(b'r', ":运行 / ".as_bytes())?;
         }
 
         if !self.show_hint {
-            show_key(b'h', b":hint / ")?;
+            show_key(b'h', ":提示 / ".as_bytes())?;
         }
 
-        show_key(b'l', b":list / ")?;
-        show_key(b'c', b":check all / ")?;
-        show_key(b'x', b":reset / ")?;
-        show_key(b'q', b":quit ? ")?;
+        show_key(b'l', ":谜题列表 / ".as_bytes())?;
+        show_key(b'c', ":检查全部 / ".as_bytes())?;
+        show_key(b'x', ":重置当前谜题 / ".as_bytes())?;
+        show_key(b'q', ":退出 ? ".as_bytes())?;
 
         stdout.flush()
     }
@@ -216,7 +215,7 @@ impl<'a> WatchState<'a> {
             stdout
                 .queue(SetAttributes(HEADING_ATTRIBUTES))?
                 .queue(SetForegroundColor(Color::Cyan))?;
-            stdout.write_all(b"Hint")?;
+            stdout.write_all("提示".as_bytes())?;
             stdout.queue(ResetColor)?;
             stdout.write_all(b"\n")?;
 
@@ -228,7 +227,7 @@ impl<'a> WatchState<'a> {
             stdout
                 .queue(SetAttribute(Attribute::Bold))?
                 .queue(SetForegroundColor(Color::Green))?;
-            stdout.write_all("Exercise done ✓".as_bytes())?;
+            stdout.write_all("谜题已解开 ✓".as_bytes())?;
             stdout.queue(ResetColor)?;
             stdout.write_all(b"\n")?;
 
@@ -236,10 +235,7 @@ impl<'a> WatchState<'a> {
                 solution_link_line(stdout, solution_path, self.app_state.emit_file_links())?;
             }
 
-            stdout.write_all(
-                "When done experimenting, enter `n` to move on to the next exercise 🦀\n\n"
-                    .as_bytes(),
-            )?;
+            stdout.write_all("谜题解开之后，可以按 `n` 键进入下一个谜题 🦀\n\n".as_bytes())?;
         }
 
         progress_bar(
@@ -249,7 +245,7 @@ impl<'a> WatchState<'a> {
             self.term_width,
         )?;
 
-        stdout.write_all(b"\nCurrent exercise: ")?;
+        stdout.write_all("\n当前谜题: ".as_bytes())?;
         self.app_state
             .current_exercise()
             .terminal_file_link(stdout, self.app_state.emit_file_links())?;

@@ -1,5 +1,5 @@
 fn main() {
-    // TODO: Change the line below to fix the compiler error.
+    // TODO: 修改下一行，使编译通过
     let x: i32;
 
     println!("Number {x}");

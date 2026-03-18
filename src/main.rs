@@ -1,4 +1,6 @@
-use anyhow::{Context, Result, bail};
+use self::{app_state::AppState, dev::DevCommands, info_file::InfoFile};
+use crate::project::RustAnalyzerProject;
+use anyhow::{bail, Context, Result};
 use app_state::StateFileStatus;
 use clap::{Parser, Subcommand};
 use std::{
@@ -7,8 +9,6 @@ use std::{
     process::ExitCode,
 };
 use term::{clear_terminal, press_enter_prompt};
-
-use self::{app_state::AppState, dev::DevCommands, info_file::InfoFile};
 
 mod app_state;
 mod cargo_toml;
@@ -19,6 +19,7 @@ mod exercise;
 mod info_file;
 mod init;
 mod list;
+mod project;
 mod run;
 mod term;
 mod watch;
@@ -61,6 +62,8 @@ enum Subcommands {
     /// Commands for developing (community) Rustlings exercises
     #[command(subcommand)]
     Dev(DevCommands),
+    /// Language Server Protocol
+    Lsp,
 }
 
 fn main() -> Result<ExitCode> {
@@ -107,7 +110,7 @@ fn main() -> Result<ExitCode> {
                 write!(
                     stdout,
                     "{welcome_message}\n\n\
-                     Press ENTER to continue "
+                     按回车键继续  "
                 )?;
                 press_enter_prompt(&mut stdout)?;
                 clear_terminal(&mut stdout)?;
@@ -157,11 +160,11 @@ fn main() -> Result<ExitCode> {
                 stdout.write_all(b"\n\n")?;
                 let pending = app_state.n_pending();
                 if pending == 1 {
-                    stdout.write_all(b"One exercise pending: ")?;
+                    stdout.write_all("正在处理一个谜题: ".as_bytes())?;
                 } else {
                     write!(
                         stdout,
-                        "{pending}/{} exercises pending. The first: ",
+                        "处理进度：{pending}/{}，现在正在处理: ",
                         app_state.exercises().len(),
                     )?;
                 }
@@ -188,24 +191,42 @@ fn main() -> Result<ExitCode> {
         }
         // Handled in an earlier match.
         Some(Subcommands::Init | Subcommands::Dev(_)) => (),
+        // Handle LSP
+        Some(Subcommands::Lsp) => {
+            let mut project = RustAnalyzerProject::new();
+            project
+                .get_sysroot_src()
+                .expect("Couldn't find toolchain path, do you have `rustc` installed?");
+            project
+                .exercises_to_json()
+                .expect("Couldn't parse rustlings exercises files");
+
+            if project.crates.is_empty() {
+                println!("Failed find any exercises, make sure you're in the `rustlings` folder");
+            } else if project.write_to_disk().is_err() {
+                println!("Failed to write rust-project.json to disk for rust-analyzer");
+            } else {
+                println!("Successfully generated rust-project.json");
+                println!(
+                    "rust-analyzer will now parse exercises, restart your language server or editor"
+                )
+            }
+        }
     }
 
     Ok(ExitCode::SUCCESS)
 }
 
 const OLD_METHOD_ERR: &str =
-    "You are trying to run Rustlings using the old method before version 6.
-The new method doesn't include cloning the Rustlings' repository.
-Please follow the instructions in `README.md`:
-https://github.com/rust-lang/rustlings#getting-started";
+    "您正在尝试运行由 v6 版本或之前的 Rustlings 创建的谜题，而新版无需克隆 Rustlings 的仓库。
+    参见 [`README.md`](https://github.com/rust-lang/rustlings#getting-started)";
 
 const FORMAT_VERSION_HIGHER_ERR: &str =
-    "The format version specified in the `info.toml` file is higher than the last one supported.
-It is possible that you have an outdated version of Rustlings.
-Try to install the latest Rustlings version first.";
+    "`info.toml` 中定义的格式版本比之前的更高，您可能正在运行一个旧版的 Rustlings。
+    请尝试安装一个最新版本的 Rustlings。";
 
 const PRE_INIT_MSG: &str = r"
-       Welcome to...
+       欢迎使用
                  _   _ _
   _ __ _   _ ___| |_| (_)_ __   __ _ ___
  | '__| | | / __| __| | | '_ \ / _` / __|
@@ -213,5 +234,6 @@ const PRE_INIT_MSG: &str = r"
  |_|   \__,_|___/\__|_|_|_| |_|\__, |___/
                                |___/
 
-The `exercises/` directory couldn't be found in the current directory.
-If you are just starting with Rustlings, run the command `rustlings init` to initialize it.";
+当前目录下没有发现 `exercises/` 文件夹（存放着各种谜题）。
+若您是第一次使用，可以运行 `rustlings init` 命令来初始化一个新的谜题文件夹。
+";

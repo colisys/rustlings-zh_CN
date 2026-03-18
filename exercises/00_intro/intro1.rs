@@ -1,12 +1,11 @@
-// TODO: We sometimes encourage you to keep trying things on a given exercise
-// even after you already figured it out. If you got everything working and feel
-// ready for the next exercise, enter `n` in the terminal.
+// TODO: 我们通常建议您多在谜题中尝试新东西，如果您已经成功解谜且满意于您的修改，
+// 就可以按 `n` 键进行下一个谜题
 //
-// The exercise file will be reloaded when you change one of the lines below!
-// Try adding a new `println!` and check the updated output in the terminal.
+// 谜题在保存后会自动检查错误！
+// 试试增加一行 `println!` 并且在控制台检查输出。
 
 fn main() {
-    println!(r#"       Welcome to...                      "#);
+    println!(r#"       欢迎使用                           "#);
     println!(r#"                 _   _ _                  "#);
     println!(r#"  _ __ _   _ ___| |_| (_)_ __   __ _ ___  "#);
     println!(r#" | '__| | | / __| __| | | '_ \ / _` / __| "#);
@@ -14,11 +13,10 @@ fn main() {
     println!(r#" |_|   \__,_|___/\__|_|_|_| |_|\__, |___/ "#);
     println!(r#"                               |___/      "#);
     println!();
-    println!("This exercise compiles successfully. The remaining exercises contain a compiler");
-    println!("or logic error. The central concept behind Rustlings is to fix these errors and");
-    println!("solve the exercises. Good luck!");
+    println!("本谜题已经编译成功，剩下的谜题中可能存在编译器或逻辑错误。");
+    println!("请修复这些错误，并且完成谜题。祝您好运！");
     println!();
-    println!("The file of this exercise is `exercises/00_intro/intro1.rs`. Have a look!");
-    println!("The current exercise path will be always shown under the progress bar.");
-    println!("You can click on the path to open the exercise file in your editor.");
+    println!("第一个谜题是 `exercises/00_intro/intro1.rs`，请打开看看吧。");
+    println!("当前的解谜进度会一直显示在下方。");
+    println!("若您的编辑器支持，可以点击上方的文件路径，进入对应的文件。");
 }

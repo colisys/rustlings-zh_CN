@@ -1,4 +1,4 @@
-// TODO: Change the line below to fix the compiler error.
+// TODO: 修改下一行，使编译通过
 const NUMBER = 3;
 
 fn main() {

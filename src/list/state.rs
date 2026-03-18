@@ -173,10 +173,10 @@ impl<'a> ListState<'a> {
 
             if exercise.done {
                 writer.stdout.queue(SetForegroundColor(Color::Green))?;
-                writer.write_ascii(b"DONE   ")?;
+                writer.write_str("通过  ")?;
             } else {
                 writer.stdout.queue(SetForegroundColor(Color::Yellow))?;
-                writer.write_ascii(b"PENDING")?;
+                writer.write_str("未通过")?;
             }
             writer.stdout.queue(SetForegroundColor(Color::Reset))?;
             writer.write_ascii(b"  ")?;
@@ -206,9 +206,9 @@ impl<'a> ListState<'a> {
 
         // Header
         let mut writer = MaxLenWriter::new(stdout, self.term_width as usize);
-        writer.write_ascii(b"  Current  State    Name")?;
+        writer.write_ascii("           状态      名称 ".as_bytes())?;
         writer.write_ascii(&self.name_col_padding[4..])?;
-        writer.write_ascii(b"Path")?;
+        writer.write_ascii("文件路径".as_bytes())?;
         next_ln(stdout)?;
 
         // Rows
@@ -238,14 +238,14 @@ impl<'a> ListState<'a> {
             if self.message.is_empty() {
                 // Help footer message
                 if self.scroll_state.selected().is_some() {
-                    writer.write_str("↓/j ↑/k home/g end/G | <c>ontinue at | <r>eset exercise")?;
+                    writer.write_str("↓/j ↑/k home/g 跳转顶部 end/G 跳转底部 | <c> 切换谜题 | <r> 重置谜题")?;
                     next_ln(stdout)?;
                     writer = MaxLenWriter::new(stdout, self.term_width as usize);
 
-                    writer.write_ascii(b"<s>earch | filter ")?;
+                    writer.write_ascii("<s> 搜索 | 过滤器 ".as_bytes())?;
                 } else {
                     // Nothing selected (and nothing shown), so only display filter and quit.
-                    writer.write_ascii(b"filter ")?;
+                    writer.write_ascii("搜索 ".as_bytes())?;
                 }
 
                 match self.filter {
@@ -254,23 +254,23 @@ impl<'a> ListState<'a> {
                             .stdout
                             .queue(SetForegroundColor(Color::Magenta))?
                             .queue(SetAttribute(Attribute::Underlined))?;
-                        writer.write_ascii(b"<d>one")?;
+                        writer.write_ascii("<d> 查看已通过".as_bytes())?;
                         writer.stdout.queue(ResetColor)?;
-                        writer.write_ascii(b"/<p>ending")?;
+                        writer.write_ascii(" / <p> 查看未通过".as_bytes())?;
                     }
                     Filter::Pending => {
-                        writer.write_ascii(b"<d>one/")?;
+                        writer.write_ascii("<d> 查看已通过 / ".as_bytes())?;
                         writer
                             .stdout
                             .queue(SetForegroundColor(Color::Magenta))?
                             .queue(SetAttribute(Attribute::Underlined))?;
-                        writer.write_ascii(b"<p>ending")?;
+                        writer.write_ascii("<p> 查看未通过".as_bytes())?;
                         writer.stdout.queue(ResetColor)?;
                     }
-                    Filter::None => writer.write_ascii(b"<d>one/<p>ending")?,
+                    Filter::None => writer.write_ascii("<d> 查看已通过 / <p> 查看未通过".as_bytes())?,
                 }
 
-                writer.write_ascii(b" | <q>uit list")?;
+                writer.write_ascii(" | <q> 退出列表".as_bytes())?;
             } else {
                 writer.stdout.queue(SetForegroundColor(Color::Magenta))?;
                 writer.write_str(&self.message)?;

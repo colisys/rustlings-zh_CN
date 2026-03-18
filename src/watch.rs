@@ -175,16 +175,17 @@ pub fn watch(
     watch_list_loop(app_state, notify_exercise_names)
 }
 
-const QUIT_MSG: &[u8] = b"
+const QUIT_MSG: &[u8] = "
 
-We hope you're enjoying learning Rust!
-If you want to continue working on the exercises at a later point, you can simply run `rustlings` again in this directory.
-";
+希望您的 Rust 之旅蒸蒸日上！
+若您想要接续之前的进度，只需在本项目的根目录再次输入 `rustlings` 即可。
+"
+.as_bytes();
 
 const NOTIFY_ERR: &str = "
-The automatic detection of exercise file changes failed :(
-Please try running `rustlings` again.
+自动检查文件内容失败 :(
+请试试重新启动 `rustlings`。
 
-If you keep getting this error, run `rustlings --manual-run` to deactivate the file watcher.
-You need to manually trigger running the current exercise using `r` then.
+若您仍然看到这个错误，尝试运行 `rustlings --manual-run` 来禁用自动检查，
+但要记得用 `r` 键来编译并测试当前的谜题。
 ";
